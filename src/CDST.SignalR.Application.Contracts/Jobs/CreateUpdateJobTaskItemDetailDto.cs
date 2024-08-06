@@ -28,6 +28,8 @@ namespace CDST.SignalR.Jobs
         /// </summary>
         public virtual bool IsDeletable { get; set; } = true;
 
+        public virtual Guid? JobTaskId { get; set; }
+
         /// <summary>
         /// 执行任务验证项目编号
         /// </summary>

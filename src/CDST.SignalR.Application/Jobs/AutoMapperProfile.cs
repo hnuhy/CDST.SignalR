@@ -11,8 +11,8 @@ namespace CDST.SignalR.Jobs
     {
         public AutoMapperProfile()
         {
-            CreateMap<CreateUpdateJobTaskItemDto, JobTaskItemDto>();
-            CreateMap<CreateUpdateJobTaskItemDetailDto, JobTaskItemDetailDto>();
+            CreateMap<CreateUpdateJobTaskItemDto, JobTaskItemDto>().ReverseMap();
+            CreateMap<CreateUpdateJobTaskItemDetailDto, JobTaskItemDetailDto>().ReverseMap();
         }
     }
 }

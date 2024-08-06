@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.AspNetCore.SignalR;
 using Volo.Abp.Caching;
+using Volo.Abp.ObjectMapping;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CDST.SignalR.Jobs
@@ -34,10 +35,15 @@ namespace CDST.SignalR.Jobs
         /// </summary>
         private readonly IDistributedCache<DoingTaskCacheItemDto> _distributedTaskCache;
 
-        public JobTaskHub(IDistributedCache<DoingTaskDto> distributedUserCache, IDistributedCache<DoingTaskCacheItemDto> distributedTaskCache)
+        private IObjectMapper _objectMapper;
+        private readonly IJobTaskAppService _jobTaskAppService;
+
+        public JobTaskHub(IDistributedCache<DoingTaskDto> distributedUserCache, IDistributedCache<DoingTaskCacheItemDto> distributedTaskCache, IObjectMapper objectMapper, IJobTaskAppService jobTaskAppService)
         {
             _distributedUserCache = distributedUserCache;
             _distributedTaskCache = distributedTaskCache;
+            _objectMapper = objectMapper;
+            _jobTaskAppService = jobTaskAppService;
         }
 
         /// <summary>
@@ -104,13 +110,15 @@ namespace CDST.SignalR.Jobs
             //这里需要记录或是更新这个用户的连接编号，这个用户之前的连接号相关的信息要处理
             var userCacheValue = await _distributedUserCache.GetAsync(curUserId.ToString());
 
+            curUserDoingJob.ConnectionId = Context.ConnectionId;
+
             if (userCacheValue != null)
             {
                 if (!userCacheValue.TaskId.Equals(Guid.Empty))
                 {
                     //取出之前的数据，因为这个用户有新的连接了，所以要将它从之前的分组中删除
                     var preConnectionId = userCacheValue.ConnectionId;
-                    if (preConnectionId != curUserDoingJob.ConnectionId)
+                    if (!string.IsNullOrWhiteSpace(preConnectionId) && preConnectionId != curUserDoingJob.ConnectionId)
                     {
                         await Groups.RemoveFromGroupAsync(preConnectionId, userCacheValue.TaskId.ToString());
                     }
@@ -352,7 +360,11 @@ namespace CDST.SignalR.Jobs
 
                     var userIds = await GetTaskUserIds(input.TaskId, input.UserId);
 
-                    await Clients.AllExcept(Context.ConnectionId).SendAsync("UpdateStatus",
+                    //await Groups.RemoveFromGroupAsync(Context.ConnectionId, input.TaskId.ToString());
+
+                    //await Clients.AllExcept(Context.ConnectionId)
+                    await Clients.OthersInGroup(input.TaskId.ToString())
+                        .SendAsync("UpdateStatus",
                         new
                         {
                             WithUserId = curUserId,
@@ -364,7 +376,7 @@ namespace CDST.SignalR.Jobs
 
                     Logger.LogInformation("SignalR Hub:UpdateStatus,Doing");
 
-                    //await Groups.AddToGroupAsync(Context.ConnectionId, input.TaskId.ToString());
+                    await Groups.AddToGroupAsync(Context.ConnectionId, input.TaskId.ToString());
                 }
                 else
                 {
@@ -463,14 +475,17 @@ namespace CDST.SignalR.Jobs
                 if (!input.UserId.Equals(Guid.Empty))
                 {
                     var curUserId = input.UserId;
-                    var curUserName = input.UserName;
+                    var curUserName = CurrentUser.UserName;
 
                     var inputData = input.TaskItemDetail;
                     if (inputData != null)
                     {
                         inputData.JobTaskItemId = input.TaskItemId;
+                        inputData.JobTaskId = input.TaskId;
 
-                        input.TaskItemDetail = inputData;
+                        var data = await _jobTaskAppService.SaveTaskItemDetailAsync(inputData);
+
+                        input.TaskItemDetail = _objectMapper.Map<JobTaskItemDetailDto, CreateUpdateJobTaskItemDetailDto>(data);
                     }
 
                     var curUserDoingJob = new DoingTaskDto()
@@ -554,7 +569,7 @@ namespace CDST.SignalR.Jobs
 
                 Guid? curTaskId = null;
 
-                //更新当前用户的缓存信息
+                //删除当前用户的缓存信息
                 {
                     var userCacheValue = await _distributedUserCache.GetAsync(curUserId.ToString());
 
@@ -571,7 +586,7 @@ namespace CDST.SignalR.Jobs
                 {
                     await Groups.RemoveFromGroupAsync(Context.ConnectionId, curTaskId.Value.ToString());
 
-                    await Clients.AllExcept(Context.ConnectionId).SendAsync("UpdateStatus",
+                    await Clients.OthersInGroup(curTaskId.Value.ToString()).SendAsync("UpdateStatus",
                         new
                         {
                             WithUserId = curUserId,

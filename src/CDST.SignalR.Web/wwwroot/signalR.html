@@ -8,9 +8,9 @@
         var token = "";
         var connection;
 
-        function getToken() {
+        function GetToken(idx) {
 
-            var txtUserName = document.getElementById("txtUserName");
+            var txtUserName = document.getElementById("txtUserName"+idx);
             var userName = txtUserName.value;
             var auth = {
                 "username": userName,
@@ -35,8 +35,8 @@
                     token = user.accessToken;
                     var userId = user.userId;
                     var userName = user.userName;
-                    document.getElementById("txtUserId").value = userId;
-                    document.getElementById("txtUserName").value = userName;
+                    document.getElementById("txtUserId" + idx).value = userId;
+                    document.getElementById("txtUserName" + idx).value = userName;
                     console.log(json);
                     //建立连接
                     connection = new signalR.HubConnectionBuilder().withUrl("./signalr-hubs/task", { accessTokenFactory: () => token })
@@ -95,11 +95,11 @@
         }
 
         //发送消息到服务端
-        function GetTaskDoing() {
+        function GetTaskDoing(idx) {
             //这个方法是获取当前任务，有哪些人在操作
-            var taskId = document.getElementById("txtTaskId").value;
-            var userId = document.getElementById("txtUserId").value;
-            var userName = document.getElementById("txtUserName").value;
+            var taskId = document.getElementById("txtTaskId" + idx).value;
+            var userId = document.getElementById("txtUserId" + idx).value;
+            var userName = document.getElementById("txtUserName" + idx).value;
 
             var data = { userId: userId, userName: userName, taskId: taskId };
 
@@ -125,10 +125,61 @@
                 "userId": document.getElementById("txtUserId").value,
                 "userName": document.getElementById("txtUserName").value,
                 "taskId": document.getElementById("txtTaskId").value,
-                "taskCategoryId": "",
-                "taskItemId": "",
+                "taskCategoryId": "6337143a-9ae2-9e91-17ce-8e723e782d34",
+                "taskItemId": "7d37143a-a088-aeb0-5eb3-716eb7a22201",
                 "taskItemDetailId": document.getElementById("txtTaskItemDetailId").value,
-                "taskItemDetail": { "concurrencyStamp": "4e8074cfa69543cba44627c34b211898", "jobTaskItemId": "10bc133a-f384-09cf-361d-88b6dc48d37f", "orderNumber": 1, "category": null, "name": "通用要求工序", "position": "12333333333", "description": null, "result": "333333123", "conclusion": "合格", "attachmentFile": [], "v1": null, "v2": null, "v3": null, "v4": null, "v5": null, "v6": null, "v7": null, "v8": null, "v9": null, "v10": null, "v11": null, "v12": null, "v13": null, "v14": null, "v15": null, "v16": null, "v17": null, "v18": null, "v19": null, "v20": null, "v21": null, "v22": null, "v23": null, "v24": null, "v25": null, "v26": null, "v27": null, "v28": null, "v29": null, "v30": null, "isDeleted": false, "deleterId": null, "deletionTime": null, "lastModificationTime": "2024-07-13 16:33:18", "lastModifierId": "5c9f133a-36e4-fbc5-3a91-fa968142cace", "creationTime": "2024-07-13 10:19:49", "creatorId": "4a9f133a-adcf-7153-9be2-1a6a794988d3", "id": "10bc133a-e285-a5c9-01e3-fb5eacd1ea8c", "extraProperties": {}, "xdindex": "yUSa3TPs5vdomxnV8N4gSXZaoZVaVgWUhGLY5q421JFjFlfQbk" }
+                "taskItemDetail": {
+                    "concurrencyStamp": "5b61f41df61a4e0e99be59a8c8147408",
+                    "jobTaskItemId": "7d37143a-a088-aeb0-5eb3-716eb7a22201",
+                    "orderNumber": 1,
+                    "isDeletable": true,
+                    "category": null,
+                    "name": "地泵校验结果",
+                    "position": null,
+                    "description": null,
+                    "result": null,
+                    "conclusion": "不涉及",
+                    "attachmentFile": [],
+                    "v1": null,
+                    "v2": null,
+                    "v3": null,
+                    "v4": null,
+                    "v5": null,
+                    "v6": null,
+                    "v7": null,
+                    "v8": null,
+                    "v9": null,
+                    "v10": null,
+                    "v11": null,
+                    "v12": null,
+                    "v13": null,
+                    "v14": null,
+                    "v15": null,
+                    "v16": null,
+                    "v17": null,
+                    "v18": null,
+                    "v19": null,
+                    "v20": null,
+                    "v21": null,
+                    "v22": null,
+                    "v23": null,
+                    "v24": null,
+                    "v25": null,
+                    "v26": null,
+                    "v27": null,
+                    "v28": null,
+                    "v29": null,
+                    "v30": null,
+                    "isDeleted": false,
+                    "deleterId": null,
+                    "deletionTime": null,
+                    "lastModificationTime": "2024-08-06 15:08:17",
+                    "lastModifierId": "5e9f133a-68a5-e029-a7a4-615c9d6a1c8f",
+                    "creationTime": "2024-08-06 09:32:10",
+                    "creatorId": "5e9f133a-d634-59ae-8f0b-859ebc4acb03",
+                    "id": "7d37143a-a288-8c09-0358-e69178c2f32b",
+                    "extraProperties": {}
+                }
             };
 
             connection.invoke("DoingTask", doingInfo)
@@ -143,24 +194,296 @@
                 });
         }
 
+
+        function Exit(idx) {
+            var userId = document.getElementById("txtUserId" + idx).value;
+            connection.invoke("ExitDoing", userId)
+                .then(function (res) {
+                    console.log("ExitDoing");
+                    console.log(res);
+                })
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        }
     </script>
 </head>
 <body>
-    <select id="txtUserName" style="width:6em" value="hy"><option value="hy">hy</option><option value="hs">hs</option></select>
-    <input type="text" id="txtUserId" style="width:20em" />
-    <button onclick="getToken()">连接</button>
+    <h1>task1 detail1--------------------------------------------------------------</h1>
+    <input type="text" id="txtUserName1" style="width:6em" value="hy" />
+    <input type="text" id="txtUserId1" style="width:20em" />
+    <button onclick="GetToken(1)">GetToken</button><button onclick="Exit(1)">Exit</button>
     <br />
     TaskId:
-    <select id="txtTaskId" value="6337143a-9ae2-0cd9-8ab2-fb94ef0cc4d8" style="width:26em">
-        <option selected value="6337143a-9ae2-0cd9-8ab2-fb94ef0cc4d8">6337143a-9ae2-0cd9-8ab2-fb94ef0cc4d8</option>
-        <option selected value="4a9f133a-adcf-7153-9be2-1a6a794988d3">4a9f133a-adcf-7153-9be2-1a6a794988d3</option>
-    </select>
-    <button onclick="GetTaskDoing()">GetTaskDoing</button>
+    <input type="text" id="txtTaskId1" value="6337143a-9ae2-0cd9-8ab2-fb94ef0cc4d8" style="width:26em" />
+    <button onclick="GetTaskDoing(1)">GetTaskDoing</button>
     <br />
-    TaskItemDetailId:<select id="txtTaskItemDetailId" value="7d37143a-a288-8c09-0358-e69178c2f32b" style="width:26em">
-        <option selected value="7d37143a-a288-8c09-0358-e69178c2f32b">7d37143a-a288-8c09-0358-e69178c2f32b</option>
-        <option selected value="7d37143a-b688-7f74-0c53-e34f02dc321c">7d37143a-b688-7f74-0c53-e34f02dc321c</option>
-    </select>
-    <button onclick="DoingTask()">DoingTask</button>
+    TaskItemDetailId:<input type="text" id="txtTaskItemDetailId1" value="7d37143a-a288-8c09-0358-e69178c2f32b" style="width:26em" />
+    <button onclick="DoingTask1('DoingTask')">DoingTask</button>
+    <button onclick="DoingTask1('SaveTaskDoing')">SaveTaskDoing</button>
+    <button onclick="DoingTask1('ExitDoingTask')">ExitDoingTask</button>
+    <script>
+        function DoingTask1(action) {
+            //e.preventDefault();
+            var idx = 1;
+
+            //这里是客户端用户告诉服务器，当前在操作哪里
+            var doingInfo = {
+                "userId": document.getElementById("txtUserId" + idx).value,
+                "userName": document.getElementById("txtUserName" + idx).value,
+                "taskId": document.getElementById("txtTaskId" + idx).value,
+                "taskCategoryId": "6337143a-9ae2-9e91-17ce-8e723e782d34",
+                "taskItemId": "7d37143a-a088-aeb0-5eb3-716eb7a22201",
+                "taskItemDetailId": document.getElementById("txtTaskItemDetailId" + idx).value,
+                "taskItemDetail": {
+                    "concurrencyStamp": "5b61f41df61a4e0e99be59a8c8147408",
+                    "jobTaskItemId": "7d37143a-a088-aeb0-5eb3-716eb7a22201",
+                    "orderNumber": 1,
+                    "isDeletable": true,
+                    "category": null,
+                    "name": "地泵校验结果",
+                    "position": null,
+                    "description": null,
+                    "result": null,
+                    "conclusion": "不涉及",
+                    "attachmentFile": [],
+                    "v1": null,
+                    "v2": null,
+                    "v3": null,
+                    "v4": null,
+                    "v5": null,
+                    "v6": null,
+                    "v7": null,
+                    "v8": null,
+                    "v9": null,
+                    "v10": null,
+                    "v11": null,
+                    "v12": null,
+                    "v13": null,
+                    "v14": null,
+                    "v15": null,
+                    "v16": null,
+                    "v17": null,
+                    "v18": null,
+                    "v19": null,
+                    "v20": null,
+                    "v21": null,
+                    "v22": null,
+                    "v23": null,
+                    "v24": null,
+                    "v25": null,
+                    "v26": null,
+                    "v27": null,
+                    "v28": null,
+                    "v29": null,
+                    "v30": null,
+                    "isDeleted": false,
+                    "deleterId": null,
+                    "deletionTime": null,
+                    "lastModificationTime": "2024-08-06 15:08:17",
+                    "lastModifierId": "5e9f133a-68a5-e029-a7a4-615c9d6a1c8f",
+                    "creationTime": "2024-08-06 09:32:10",
+                    "creatorId": "5e9f133a-d634-59ae-8f0b-859ebc4acb03",
+                    "id": "7d37143a-a288-8c09-0358-e69178c2f32b",
+                    "extraProperties": {}
+                }
+            };
+
+            connection.invoke(action, doingInfo)
+                .then(function (res) {
+
+                    console.log("调用" + action + "成功");
+                    //返回的数据里包含当前任务有哪些人在操作，在操作什么
+                    console.log(res);
+                })
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        }
+    </script>
+    <h1>task1 detail2-------------------------------------------------------------</h1>
+    <input type="text" id="txtUserName2" style="width:6em" value="hs" />
+    <input type="text" id="txtUserId2" style="width:20em" />
+    <button onclick="GetToken(2)">GetToken</button><button onclick="Exit(2)">Exit</button>
+    <br />
+    TaskId:
+    <input type="text" id="txtTaskId2" value="6337143a-9ae2-0cd9-8ab2-fb94ef0cc4d8" style="width:26em" />
+    <button onclick="GetTaskDoing(2)">GetTaskDoing</button>
+    <br />
+    TaskItemDetailId:<input type="text" id="txtTaskItemDetailId2" value="7d37143a-b688-7f74-0c53-e34f02dc321c" style="width:26em" />
+    <button onclick="DoingTask2('DoingTask')">DoingTask</button>
+    <button onclick="DoingTask2('SaveTaskDoing')">SaveTaskDoing</button>
+    <button onclick="DoingTask2('ExitDoingTask')">ExitDoingTask</button>
+    <script>
+        function DoingTask2(action) {
+            //e.preventDefault();
+            var idx = 2;
+            //这里是客户端用户告诉服务器，当前在操作哪里
+            var doingInfo = {
+                "userId": document.getElementById("txtUserId" + idx).value,
+                "userName": document.getElementById("txtUserName" + idx).value,
+                "taskId": document.getElementById("txtTaskId" + idx).value,
+                "taskCategoryId": "6337143a-9ae2-9e91-17ce-8e723e782d34",
+                "taskItemId": "7d37143a-a088-aeb0-5eb3-716eb7a22201",
+                "taskItemDetailId": document.getElementById("txtTaskItemDetailId" + idx).value,
+                "taskItemDetail": {
+                    "concurrencyStamp": "cd77fa7939db4daea0506620bef77d76",
+                    "jobTaskItemId": "7d37143a-a088-aeb0-5eb3-716eb7a22201",
+                    "orderNumber": 2,
+                    "isDeletable": true,
+                    "category": null,
+                    "name": "操作屏显示值与实际值校验",
+                    "position": null,
+                    "description": null,
+                    "result": null,
+                    "conclusion": "不涉及",
+                    "attachmentFile": [],
+                    "v1": null,
+                    "v2": null,
+                    "v3": null,
+                    "v4": null,
+                    "v5": null,
+                    "v6": null,
+                    "v7": null,
+                    "v8": null,
+                    "v9": null,
+                    "v10": null,
+                    "v11": null,
+                    "v12": null,
+                    "v13": null,
+                    "v14": null,
+                    "v15": null,
+                    "v16": null,
+                    "v17": null,
+                    "v18": null,
+                    "v19": null,
+                    "v20": null,
+                    "v21": null,
+                    "v22": null,
+                    "v23": null,
+                    "v24": null,
+                    "v25": null,
+                    "v26": null,
+                    "v27": null,
+                    "v28": null,
+                    "v29": null,
+                    "v30": null,
+                    "isDeleted": false,
+                    "deleterId": null,
+                    "deletionTime": null,
+                    "lastModificationTime": "2024-08-06 15:08:17",
+                    "lastModifierId": "5e9f133a-68a5-e029-a7a4-615c9d6a1c8f",
+                    "creationTime": "2024-08-06 09:32:10",
+                    "creatorId": "5e9f133a-d634-59ae-8f0b-859ebc4acb03",
+                    "id": "7d37143a-b688-7f74-0c53-e34f02dc321c",
+                    "extraProperties": {}
+                }
+            };
+
+            connection.invoke(action, doingInfo)
+                .then(function (res) {
+
+                    console.log("调用" + action + "成功");
+                    //返回的数据里包含当前任务有哪些人在操作，在操作什么
+                    console.log(res);
+                })
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        }
+    </script>
+    <h1>task 2 detail1-------------------------------------------------------------</h1>
+    <input type="text" id="txtUserName3" style="width:6em" value="yjp" />
+    <input type="text" id="txtUserId3" style="width:20em" />
+    <button onclick="GetToken(3)">GetToken</button><button onclick="Exit(3)">Exit</button>
+    <br />
+    TaskId:
+    <input type="text" id="txtTaskId3" value="6337143a-abe2-6560-afc5-b1e8406ee8b0" style="width:26em" />
+    <button onclick="GetTaskDoing(3)">GetTaskDoing</button>
+    <br />
+    TaskItemDetailId:<input type="text" id="txtTaskItemDetailId3" value="d837143a-8b08-e0de-c368-260cadb90a9d" style="width:26em" />
+    <button onclick="DoingTask3('DoingTask')">DoingTask</button>
+    <button onclick="DoingTask3('SaveTaskDoing')">SaveTaskDoing</button>
+    <button onclick="DoingTask3('ExitDoingTask')">ExitDoingTask</button>
+    <script>
+        function DoingTask3(action) {
+            //e.preventDefault();
+            var idx = 3;
+            //这里是客户端用户告诉服务器，当前在操作哪里
+            var doingInfo = {
+                "userId": document.getElementById("txtUserId" + idx).value,
+                "userName": document.getElementById("txtUserName" + idx).value,
+                "taskId": document.getElementById("txtTaskId" + idx).value,
+                "taskCategoryId": "6337143a-abe2-8d5e-19f9-3217ac665d05",
+                "taskItemId": "d837143a-8a08-fa8c-9ea3-6aa98743c35e",
+                "taskItemDetailId": document.getElementById("txtTaskItemDetailId" + idx).value,
+                "taskItemDetail": {
+                    "concurrencyStamp": "c3b7f6320c45457fabf44bcf3f47a3ae",
+                    "jobTaskItemId": "d837143a-8a08-fa8c-9ea3-6aa98743c35e",
+                    "orderNumber": 3,
+                    "isDeletable": true,
+                    "category": null,
+                    "name": "稀奶油脂肪含量",
+                    "position": null,
+                    "description": null,
+                    "result": null,
+                    "conclusion": null,
+                    "attachmentFile": null,
+                    "v1": null,
+                    "v2": null,
+                    "v3": null,
+                    "v4": null,
+                    "v5": null,
+                    "v6": null,
+                    "v7": null,
+                    "v8": null,
+                    "v9": null,
+                    "v10": null,
+                    "v11": null,
+                    "v12": null,
+                    "v13": null,
+                    "v14": null,
+                    "v15": null,
+                    "v16": null,
+                    "v17": null,
+                    "v18": null,
+                    "v19": null,
+                    "v20": null,
+                    "v21": null,
+                    "v22": null,
+                    "v23": null,
+                    "v24": null,
+                    "v25": null,
+                    "v26": null,
+                    "v27": null,
+                    "v28": null,
+                    "v29": null,
+                    "v30": null,
+                    "isDeleted": false,
+                    "deleterId": null,
+                    "deletionTime": null,
+                    "lastModificationTime": "2024-08-06 15:08:17",
+                    "lastModifierId": "5e9f133a-68a5-e029-a7a4-615c9d6a1c8f",
+                    "creationTime": "2024-08-06 11:11:01",
+                    "creatorId": "5c9f133a-a3d5-364b-9bea-754d4c367443",
+                    "id": "d837143a-8b08-e0de-c368-260cadb90a9d",
+                    "extraProperties": {}
+                }
+            };
+
+
+            connection.invoke(action, doingInfo)
+                .then(function (res) {
+
+                    console.log("调用" + action + "成功");
+                    //返回的数据里包含当前任务有哪些人在操作，在操作什么
+                    console.log(res);
+                })
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        }
+    </script>
+
 </body>
 </html>
