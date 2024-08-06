@@ -47,6 +47,12 @@ using Volo.Abp.OpenIddict;
 using Volo.Abp.Security.Claims;
 using Volo.Abp.SettingManagement.Web;
 using Volo.Abp.Studio.Client.AspNetCore;
+using Serilog;
+using System.Linq;
+using Microsoft.AspNetCore.Cors;
+using Volo.Abp.AspNetCore.ExceptionHandling;
+using Volo.Abp.Auditing;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace CDST.SignalR.Web;
 
@@ -89,6 +95,15 @@ public class SignalRWebModule : AbpModule
                 options.AddAudiences("SignalR");
                 options.UseLocalServer();
                 options.UseAspNetCore();
+            });
+
+            //
+            builder.AddServer(config =>
+            {
+                config.SetAccessTokenLifetime(TimeSpan.FromMinutes(15));
+                config.SetIdentityTokenLifetime(TimeSpan.FromMinutes(15));
+                config.SetRefreshTokenLifetime(TimeSpan.FromDays(15));
+
             });
         });
 
@@ -134,6 +149,8 @@ public class SignalRWebModule : AbpModule
         ConfigureNavigationServices();
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
+
+        ConfigureCors(context, configuration);
 
         Configure<PermissionManagementOptions>(options =>
         {
@@ -232,6 +249,18 @@ public class SignalRWebModule : AbpModule
         {
             options.ConventionalControllers.Create(typeof(SignalRApplicationModule).Assembly);
         });
+
+        Configure<AbpExceptionHandlingOptions>(options =>
+        {
+            options.SendExceptionsDetailsToClients = true;
+            options.SendStackTraceToClients = true;
+        });
+
+        Configure<AbpAuditingOptions>(options =>
+        {
+            options.IsEnabled = false; //Disables the auditing system
+            //options.EntityHistorySelectors.AddAllEntities();
+        });
     }
 
     private void ConfigureSwaggerServices(IServiceCollection services)
@@ -245,12 +274,64 @@ public class SignalRWebModule : AbpModule
             }
         );
     }
+    private const string DefaultSignalRCorsPolicyName = "SignalRDefault";
+
+    private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        var urls = configuration["App:CorsOrigins"]?
+                        .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                        .Select(o => o.RemovePostFix("/"))
+                        .ToArray() ?? Array.Empty<string>();
+
+        context.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder
+                    .WithOrigins(configuration["App:CorsOrigins"]?
+                        .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                        .Select(o => o.RemovePostFix("/"))
+                        .ToArray() ?? Array.Empty<string>())
+                    .WithAbpExposedHeaders()
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+
+        context.Services.AddCors(options =>
+        {
+            var cors = configuration["App:CorsOrigins"]?
+                                    .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(o => o.RemovePostFix("/"))
+                                    .ToArray() ?? Array.Empty<string>();
+
+            Log.Information("CorsOrigins:" + string.Join(",", cors));
+
+            options.AddPolicy(DefaultSignalRCorsPolicyName, builder =>
+            {
+                builder.WithOrigins(configuration["App:CorsOrigins"]?
+                                    .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(o => o.RemovePostFix("/"))
+                                    .ToArray() ?? Array.Empty<string>())
+                    .WithAbpExposedHeaders()
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+    }
 
 
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
     {
         var app = context.GetApplicationBuilder();
         var env = context.GetEnvironment();
+
+
+        app.UseCors(DefaultSignalRCorsPolicyName);
 
         if (env.IsDevelopment())
         {
@@ -289,5 +370,20 @@ public class SignalRWebModule : AbpModule
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints();
+
+        //Ä¬ÈÏÖÐÎÄ
+        app.UseAbpRequestLocalization(optios => optios.SetDefaultCulture("zh-hans"));
+
+        var forwardOptions = new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            RequireHeaderSymmetry = false
+        };
+
+        forwardOptions.KnownNetworks.Clear();
+        forwardOptions.KnownProxies.Clear();
+
+        // ref: https://github.com/aspnet/Docs/issues/2384
+        app.UseForwardedHeaders(forwardOptions);
     }
 }

@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SignalR</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.14/signalr.min.js"></script>
+    <script>
+        var tokenType = "";
+        var token = "";
+        var connection;
+
+        function getToken() {
+
+            var txtUserName = document.getElementById("txtUserName");
+            var userName = txtUserName.value;
+            var auth = {
+                "username": userName,
+                "password": "",
+                "cryptPassword": "",
+                "from": "OA"
+            };
+
+
+            var httpRequest = new XMLHttpRequest();//第一步：创建需要的对象
+            httpRequest.open('POST', './api/authenticate', true); //第二步：打开连接/***发送json格式文件必须设置请求头 ；如下 - */
+            httpRequest.setRequestHeader("Content-type", "application/json");//设置请求头 注：post方式必须设置请求头（在建立连接后设置请求头）var obj = { name: 'zhansgan', age: 18 };
+            httpRequest.send(JSON.stringify(auth));//发送请求 将json写入send中
+            /**
+             * 获取数据后的处理程序
+             */
+            httpRequest.onreadystatechange = function () {//请求后的回调接口，可将请求成功后要执行的程序写在其中
+                if (httpRequest.readyState == 4 && httpRequest.status == 200) {//验证请求是否发送成功
+                    var json = httpRequest.responseText;//获取到服务端返回的数据
+                    var user = JSON.parse(json);
+                    tokenType = user.tokenType;
+                    token = user.accessToken;
+                    var userId = user.userId;
+                    var userName = user.userName;
+                    document.getElementById("txtUserId").value = userId;
+                    document.getElementById("txtUserName").value = userName;
+                    console.log(json);
+                    //建立连接
+                    connection = new signalR.HubConnectionBuilder().withUrl("./signalr-hubs/task", { accessTokenFactory: () => token })
+                        .configureLogging(signalR.LogLevel.Trace)
+                        .withAutomaticReconnect()
+                        .build();
+                    // 启动连接
+                    startConnection();
+
+                    // 接收服务端发送的消息
+                    connection.on("UpdateStatus", function (message) {
+                        // 处理接收到的消息
+                        //这个方法是服务器通知客户端，需要客户端更新一下当前的状态，这里可以直接调用DoingTask
+                        console.log("接收到UpdateStatus ");
+                        alert("接收到UpdateStatus");
+                        console.log(message);
+                    });
+                }
+            };
+        }
+
+
+
+        // 启动定期发送心跳检测
+        setInterval(sendHeartbeat, 180000); // 每XX秒发送一次心跳检测
+
+        // 定期发送心跳检测
+        function sendHeartbeat() {
+            if (connection && connection.state === "Connected") {
+                connection.invoke("Heartbeat")
+                    .then((result) => {
+                        console.log("心跳检测成功:" + Date.parse(new Date()));
+                        //alert("心跳检测成功:" + Date.parse(new Date()));
+                    })
+                    .catch((error) => {
+                        console.error("心跳检测失败：" + error + "," + Date.parse(new Date()));
+                        connection.stop();
+                        startConnection();
+                    });
+            }
+
+        }
+
+        // 尝试启动连接
+        function startConnection() {
+            connection.start()
+                .then(() => {
+                    console.log("连接成功");
+
+                    sendHeartbeat();
+                })
+                .catch((error) => {
+                    console.error("连接失败：" + error);
+                    alert("连接失败：" + error);
+                });
+        }
+
+        //发送消息到服务端
+        function GetTaskDoing() {
+            //这个方法是获取当前任务，有哪些人在操作
+            var taskId = document.getElementById("txtTaskId").value;
+            var userId = document.getElementById("txtUserId").value;
+            var userName = document.getElementById("txtUserName").value;
+
+            var data = { userId: userId, userName: userName, taskId: taskId };
+
+            connection.invoke("GetTaskDoing", data)
+                .then(function (res) {
+                    //返回的数据里包含当前任务有哪些人在操作，在操作什么
+                    console.log("调用GetTaskDoing成功");
+                    //alert("调用GetTaskDoing成功");
+                    console.log(res);
+                })
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        }
+
+
+        //发送消息到服务端
+        function DoingTask() {
+            //e.preventDefault();
+
+            //这里是客户端用户告诉服务器，当前在操作哪里
+            var doingInfo = {
+                "userId": document.getElementById("txtUserId").value,
+                "userName": document.getElementById("txtUserName").value,
+                "taskId": document.getElementById("txtTaskId").value,
+                "taskCategoryId": "",
+                "taskItemId": "",
+                "taskItemDetailId": document.getElementById("txtTaskItemDetailId").value,
+                "taskItemDetail": { "concurrencyStamp": "4e8074cfa69543cba44627c34b211898", "jobTaskItemId": "10bc133a-f384-09cf-361d-88b6dc48d37f", "orderNumber": 1, "category": null, "name": "通用要求工序", "position": "12333333333", "description": null, "result": "333333123", "conclusion": "合格", "attachmentFile": [], "v1": null, "v2": null, "v3": null, "v4": null, "v5": null, "v6": null, "v7": null, "v8": null, "v9": null, "v10": null, "v11": null, "v12": null, "v13": null, "v14": null, "v15": null, "v16": null, "v17": null, "v18": null, "v19": null, "v20": null, "v21": null, "v22": null, "v23": null, "v24": null, "v25": null, "v26": null, "v27": null, "v28": null, "v29": null, "v30": null, "isDeleted": false, "deleterId": null, "deletionTime": null, "lastModificationTime": "2024-07-13 16:33:18", "lastModifierId": "5c9f133a-36e4-fbc5-3a91-fa968142cace", "creationTime": "2024-07-13 10:19:49", "creatorId": "4a9f133a-adcf-7153-9be2-1a6a794988d3", "id": "10bc133a-e285-a5c9-01e3-fb5eacd1ea8c", "extraProperties": {}, "xdindex": "yUSa3TPs5vdomxnV8N4gSXZaoZVaVgWUhGLY5q421JFjFlfQbk" }
+            };
+
+            connection.invoke("DoingTask", doingInfo)
+                .then(function (res) {
+
+                    console.log("调用DoingTask成功");
+                    //返回的数据里包含当前任务有哪些人在操作，在操作什么
+                    console.log(res);
+                })
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        }
+
+    </script>
+</head>
+<body>
+    <select id="txtUserName" style="width:6em" value="hy"><option value="hy">hy</option><option value="hs">hs</option></select>
+    <input type="text" id="txtUserId" style="width:20em" />
+    <button onclick="getToken()">连接</button>
+    <br />
+    TaskId:
+    <select id="txtTaskId" value="6337143a-9ae2-0cd9-8ab2-fb94ef0cc4d8" style="width:26em">
+        <option selected value="6337143a-9ae2-0cd9-8ab2-fb94ef0cc4d8">6337143a-9ae2-0cd9-8ab2-fb94ef0cc4d8</option>
+        <option selected value="4a9f133a-adcf-7153-9be2-1a6a794988d3">4a9f133a-adcf-7153-9be2-1a6a794988d3</option>
+    </select>
+    <button onclick="GetTaskDoing()">GetTaskDoing</button>
+    <br />
+    TaskItemDetailId:<select id="txtTaskItemDetailId" value="7d37143a-a288-8c09-0358-e69178c2f32b" style="width:26em">
+        <option selected value="7d37143a-a288-8c09-0358-e69178c2f32b">7d37143a-a288-8c09-0358-e69178c2f32b</option>
+        <option selected value="7d37143a-b688-7f74-0c53-e34f02dc321c">7d37143a-b688-7f74-0c53-e34f02dc321c</option>
+    </select>
+    <button onclick="DoingTask()">DoingTask</button>
+</body>
+</html>

@@ -6,6 +6,7 @@ using Volo.Abp.AutoMapper;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Modularity;
 using Volo.Abp.TenantManagement;
+using Volo.Abp.AspNetCore.SignalR;
 
 namespace CDST.SignalR;
 
@@ -17,7 +18,8 @@ namespace CDST.SignalR;
     typeof(AbpIdentityApplicationModule),
     typeof(AbpAccountApplicationModule),
     typeof(AbpTenantManagementApplicationModule),
-    typeof(AbpSettingManagementApplicationModule)
+    typeof(AbpSettingManagementApplicationModule),
+    typeof(AbpAspNetCoreSignalRModule)
     )]
 public class SignalRApplicationModule : AbpModule
 {
