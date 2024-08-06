@@ -1,0 +1,10 @@
+﻿{
+  "applications": {
+    "CDST.SignalR.Web": {
+      "type": "dotnet-project",
+      "launchUrl": "https://localhost:44344",
+      "path": "../../../src/CDST.SignalR.Web/CDST.SignalR.Web.csproj",
+      "kubernetesService": ".*-web$"
+    }
+  }
+}

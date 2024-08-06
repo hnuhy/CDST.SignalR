@@ -1,0 +1,89 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.Account": {
+      "version": "8.2.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "8.2.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.Identity": {
+      "version": "8.2.1",
+      "isInstalled": true
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "8.2.1",
+      "isInstalled": true
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "CDST.SignalR.Application": {
+      "path": "src/CDST.SignalR.Application/CDST.SignalR.Application.abppkg",
+      "folder": "src"
+    },
+    "CDST.SignalR.Application.Tests": {
+      "path": "test/CDST.SignalR.Application.Tests/CDST.SignalR.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "CDST.SignalR.Domain.Shared": {
+      "path": "src/CDST.SignalR.Domain.Shared/CDST.SignalR.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "CDST.SignalR.Application.Contracts": {
+      "path": "src/CDST.SignalR.Application.Contracts/CDST.SignalR.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "CDST.SignalR.HttpApi": {
+      "path": "src/CDST.SignalR.HttpApi/CDST.SignalR.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "CDST.SignalR.HttpApi.Client": {
+      "path": "src/CDST.SignalR.HttpApi.Client/CDST.SignalR.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "CDST.SignalR.Web": {
+      "path": "src/CDST.SignalR.Web/CDST.SignalR.Web.abppkg",
+      "folder": "src"
+    },
+    "CDST.SignalR.Web.Tests": {
+      "path": "test/CDST.SignalR.Web.Tests/CDST.SignalR.Web.Tests.abppkg",
+      "folder": "test"
+    },
+    "CDST.SignalR.EntityFrameworkCore.Tests": {
+      "path": "test/CDST.SignalR.EntityFrameworkCore.Tests/CDST.SignalR.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "CDST.SignalR.EntityFrameworkCore": {
+      "path": "src/CDST.SignalR.EntityFrameworkCore/CDST.SignalR.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "CDST.SignalR.TestBase": {
+      "path": "test/CDST.SignalR.TestBase/CDST.SignalR.TestBase.abppkg",
+      "folder": "test"
+    },
+    "CDST.SignalR.Domain.Tests": {
+      "path": "test/CDST.SignalR.Domain.Tests/CDST.SignalR.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "CDST.SignalR.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/CDST.SignalR.HttpApi.Client.ConsoleTestApp/CDST.SignalR.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "CDST.SignalR.DbMigrator": {
+      "path": "src/CDST.SignalR.DbMigrator/CDST.SignalR.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "CDST.SignalR.Domain": {
+      "path": "src/CDST.SignalR.Domain/CDST.SignalR.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}
